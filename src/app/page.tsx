@@ -135,7 +135,7 @@ export default function Home() {
         )}
       </main>
 
-      {isPreviewExpanded && (
+      {isPreviewExpanded && generatedCode && (
         <ResizablePreviewModal onClose={() => setIsPreviewExpanded(false)}>
           <DynamicComponent code={generatedCode.component} />
         </ResizablePreviewModal>

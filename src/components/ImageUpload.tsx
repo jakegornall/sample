@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 interface ImageUploadProps {
@@ -10,6 +10,8 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ label, onImageSelect, value }: ImageUploadProps) {
+  const uploaderRef = useRef<HTMLDivElement>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -25,38 +27,47 @@ export function ImageUpload({ label, onImageSelect, value }: ImageUploadProps) {
     reader.readAsDataURL(file);
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    
-    if (items) {
-      for (const item of Array.from(items)) {
-        if (item.type.indexOf('image') !== -1) {
-          const file = item.getAsFile();
-          if (file) {
-            handleFile(file);
-            e.preventDefault();
-            break;
+  useEffect(() => {
+    const handleGlobalPaste = (e: ClipboardEvent) => {
+      if (!uploaderRef.current?.contains(document.activeElement)) {
+        return;
+      }
+
+      const items = e.clipboardData?.items;
+      
+      if (items) {
+        for (const item of Array.from(items)) {
+          if (item.type.indexOf('image') !== -1) {
+            const file = item.getAsFile();
+            if (file) {
+              handleFile(file);
+              e.preventDefault();
+              break;
+            }
           }
         }
       }
-    }
-  };
+    };
+
+    document.addEventListener('paste', handleGlobalPaste);
+    
+    return () => {
+      document.removeEventListener('paste', handleGlobalPaste);
+    };
+  }, []);
 
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium">{label}</p>
       <div 
+        ref={uploaderRef}
         className="border-2 border-dashed rounded-lg p-4 text-center"
-        onPaste={handlePaste}
         tabIndex={0}
         role="button"
         onKeyDown={(e) => {
-          // Allow paste with Ctrl+V or Cmd+V when focused
           if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-            // Let the onPaste handler do its job
             return;
           }
-          // Handle space or enter as click
           if (e.key === ' ' || e.key === 'Enter') {
             e.preventDefault();
             const input = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
