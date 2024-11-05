@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { CodeBlock } from "@/components/CodeBlock";
 import { DynamicComponent } from "@/components/DynamicComponent";
+import { Maximize2 } from 'lucide-react';
+import { ResizablePreviewModal } from "@/components/ResizablePreviewModal";
 
 interface FormState {
   desktopImage: string | null;
@@ -25,6 +27,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedCode, setGeneratedCode] = useState<GeneratedCode | null>(null);
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -107,7 +110,16 @@ export default function Home() {
 
               {/* Live Preview */}
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold">Live Preview</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Live Preview</h2>
+                  <button
+                    onClick={() => setIsPreviewExpanded(true)}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                    aria-label="Expand preview"
+                  >
+                    <Maximize2 className="w-5 h-5" />
+                  </button>
+                </div>
                 <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border min-h-[200px]">
                   <DynamicComponent code={generatedCode.component} />
                 </div>
@@ -122,6 +134,12 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {isPreviewExpanded && (
+        <ResizablePreviewModal onClose={() => setIsPreviewExpanded(false)}>
+          <DynamicComponent code={generatedCode.component} />
+        </ResizablePreviewModal>
+      )}
     </div>
   );
 }
