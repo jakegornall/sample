@@ -1,0 +1,79 @@
+@startuml Component Builder AI Architecture
+
+skinparam backgroundColor transparent
+skinparam componentStyle rectangle
+skinparam padding 4
+skinparam nodesep 60
+skinparam ranksep 60
+
+!define RECTANGLE class
+
+actor "Developer" as dev
+actor "Manager" as manager
+
+together {
+  rectangle "CLI Tool" as cli {
+      component "component-builder-cli" as cliTool
+  }
+
+  rectangle "Web Interface" {
+      component "React Frontend" as frontend {
+          component "Image Upload" as upload
+          component "Code Editor" as editor
+          component "Live Preview" as preview
+      }
+  }
+}
+
+rectangle "Backend Services" {
+    rectangle "API Layer" as api {
+        component "/api/generate" as generate
+        component "/api/transform" as transform
+    }
+    
+    rectangle "Multi-Modal AI Engine" as aiEngine {
+        together {
+          component "Image Analysis" as imageAnalysis
+          component "Text Analysis" as textAnalysis
+        }
+        component "Code Generation" as codeGen
+        component "Test Generation" as testGen
+    }
+}
+
+' Web Flow
+dev -[thickness=2]-> frontend
+dev -[thickness=2]-> cli
+manager -[thickness=2]-> frontend
+upload -[thickness=1]-> generate : "Design Screenshots"
+editor -[thickness=1]-> generate : "Business Logic"
+generate -[thickness=1]-> aiEngine
+preview -[thickness=1]-> transform
+
+' CLI Flow
+cli -[thickness=1]-> generate
+
+' AI Engine Internal Flow
+imageAnalysis -[thickness=1]-> codeGen
+textAnalysis -[thickness=1]-> codeGen
+codeGen -[thickness=1]-> testGen
+
+note right of cli
+  Developers can use CLI for
+  automated component generation
+  in their workflow
+end note
+
+note right of frontend
+  Web interface provides visual
+  feedback and live preview
+  of generated components
+end note
+
+note right of aiEngine
+  Multi-modal AI processes both
+  visual designs and textual
+  business logic together
+end note
+
+@enduml
